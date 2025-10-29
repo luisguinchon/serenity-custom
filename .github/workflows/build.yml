@@ -29,6 +29,8 @@ jobs:
           touch Toolchain/CMake/meson-cross-file-Clang.txt.in
 
       - name: Build SerenityOS (Core only)
+        env:
+          CMAKE_SYSTEM_NAME: LXsystem
         run: |
           bash Meta/serenity.sh build x86_64 Clang
 
