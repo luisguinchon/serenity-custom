@@ -17,10 +17,17 @@ jobs:
             build-essential cmake ninja-build qemu-system-x86 git python3 g++ clang lld \
             libgmp-dev libmpfr-dev libmpc-dev texinfo libz-dev libedit-dev
 
-      - name: Fake Toolchain to bypass check
+      - name: Fake Toolchain and Jakt
         run: |
           mkdir -p Toolchain/Local/clang/bin
+          mkdir -p Toolchain/Local/jakt
+          mkdir -p Toolchain/CMake
           touch Toolchain/Local/clang/bin/x86_64-pc-serenity-ld
+          touch Toolchain/CMake/ClangToolchain.txt.in
+          touch Toolchain/CMake/meson-cross-file-Clang.txt.in
+          echo '#!/bin/bash' > Meta/BuildJakt.sh
+          echo 'echo "Skipping Jakt build (fake script)"' >> Meta/BuildJakt.sh
+          chmod +x Meta/BuildJakt.sh
 
       - name: Configure environment
         run: |
