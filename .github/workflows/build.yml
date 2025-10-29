@@ -15,12 +15,12 @@ jobs:
           sudo apt update
           sudo apt install -y \
             build-essential cmake ninja-build qemu-system-x86 git python3 g++ clang lld \
-            libgmp-dev libmpfr-dev libmpc-dev texinfo libz-dev libedit-dev
+            libgmp-dev libmpfr-dev libmpc-dev texinfo libz-dev libedit-dev curl
 
-      - name: Fake Toolchain and Jakt
+      - name: Fake Toolchain and disable Jakt
         run: |
           mkdir -p Toolchain/Local/clang/bin
-          mkdir -p Toolchain/Local/jakt
+          mkdir -p Toolchain/Local/jakt/bin
           mkdir -p Toolchain/CMake
           touch Toolchain/Local/clang/bin/x86_64-pc-serenity-ld
           touch Toolchain/CMake/ClangToolchain.txt.in
@@ -33,13 +33,16 @@ jobs:
         run: |
           export SERENITY_ARCH=x86_64
           export SERENITY_TOOLCHAIN=Clang
+          export SERENITY_DISABLE_LAGOM=1
           echo "SERENITY_ARCH=x86_64" >> $GITHUB_ENV
           echo "SERENITY_TOOLCHAIN=Clang" >> $GITHUB_ENV
+          echo "SERENITY_DISABLE_LAGOM=1" >> $GITHUB_ENV
           mkdir -p Build/x86_64
 
-      - name: Build SerenityOS
+      - name: Build SerenityOS (Core only)
         run: |
-          bash Meta/serenity.sh build x86_64 Clang
+          cmake -S . -B Build/x86_64 -GNinja -DSERENITY_TOOLCHAIN=Clang -DSERENITY_ARCH=x86_64 -DENABLE_LAGOM=OFF -DENABLE_JAKT=OFF
+          cmake --build Build/x86_64 --target image
 
       - name: Package ISO
         if: success()
