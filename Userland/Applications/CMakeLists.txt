@@ -48,6 +48,4 @@ add_subdirectory(ThemeEditor)
 add_subdirectory(VideoPlayer)
 add_subdirectory(Weather)
 add_subdirectory(Welcome)
-add_subdirectory(StorageManager)
-add_subdirectory(Pong)
 
