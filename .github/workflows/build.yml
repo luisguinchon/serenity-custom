@@ -7,36 +7,28 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install deps
         run: |
           sudo apt update
           sudo apt install -y \
-            build-essential cmake ninja-build qemu-system-x86 git python3 g++ clang lld \
-            libgmp-dev libmpfr-dev libmpc-dev texinfo libz-dev libedit-dev curl
+            build-essential cmake ninja-build qemu-system-x86 git python3 \
+            g++ clang lld libgmp-dev libmpfr-dev libmpc-dev texinfo \
+            libz-dev libedit-dev curl ccache tmux
 
-      - name: Fake Toolchain and disable Jakt
-        run: |
-          mkdir -p Toolchain/Local/clang/bin
-          mkdir -p Toolchain/Local/jakt/bin
-          mkdir -p Toolchain/CMake
-          echo '#!/bin/bash' > Meta/BuildJakt.sh
-          echo 'echo "Skipping Jakt build (fake script)"' >> Meta/BuildJakt.sh
-          chmod +x Meta/BuildJakt.sh
-          touch Toolchain/CMake/ClangToolchain.txt.in
-          touch Toolchain/CMake/meson-cross-file-Clang.txt.in
+      - name: Build toolchain
+        run: bash Meta/serenity.sh rebuild-toolchain
 
-      - name: Manual build (skip serenity.sh restriction)
-        run: |
-          mkdir -p Build/x86_64
-          cmake -S . -B Build/x86_64 -GNinja -DCMAKE_SYSTEM_NAME=LXsystem -DSERENITY_ARCH=x86_64 -DSERENITY_TOOLCHAIN=Clang
-          cmake --build Build/x86_64 -- -j$(nproc)
+      - name: Build system
+        run: bash Meta/serenity.sh build x86_64 GNU
 
-      - name: Package ISO
-        if: success()
+      - name: Create image
+        run: bash Meta/serenity.sh image x86_64 GNU
+
+      - name: Upload ISO
         uses: actions/upload-artifact@v4
         with:
           name: SerenityOS-ISO
-          path: Build/x86_64/**/*.iso
+          path: Build/x86_64/*.iso
