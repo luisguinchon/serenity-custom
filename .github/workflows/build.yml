@@ -22,27 +22,15 @@ jobs:
           mkdir -p Toolchain/Local/clang/bin
           mkdir -p Toolchain/Local/jakt/bin
           mkdir -p Toolchain/CMake
-          touch Toolchain/Local/clang/bin/x86_64-pc-serenity-ld
-          touch Toolchain/CMake/ClangToolchain.txt.in
-          touch Toolchain/CMake/meson-cross-file-Clang.txt.in
           echo '#!/bin/bash' > Meta/BuildJakt.sh
           echo 'echo "Skipping Jakt build (fake script)"' >> Meta/BuildJakt.sh
           chmod +x Meta/BuildJakt.sh
-
-      - name: Configure environment
-        run: |
-          export SERENITY_ARCH=x86_64
-          export SERENITY_TOOLCHAIN=Clang
-          export SERENITY_DISABLE_LAGOM=1
-          echo "SERENITY_ARCH=x86_64" >> $GITHUB_ENV
-          echo "SERENITY_TOOLCHAIN=Clang" >> $GITHUB_ENV
-          echo "SERENITY_DISABLE_LAGOM=1" >> $GITHUB_ENV
-          mkdir -p Build/x86_64
+          touch Toolchain/CMake/ClangToolchain.txt.in
+          touch Toolchain/CMake/meson-cross-file-Clang.txt.in
 
       - name: Build SerenityOS (Core only)
         run: |
-          cmake -S . -B Build/x86_64 -GNinja -DSERENITY_TOOLCHAIN=Clang -DSERENITY_ARCH=x86_64 -DENABLE_LAGOM=OFF -DENABLE_JAKT=OFF
-          cmake --build Build/x86_64 --target image
+          bash Meta/serenity.sh build x86_64 Clang
 
       - name: Package ISO
         if: success()
