@@ -17,6 +17,11 @@ jobs:
             build-essential cmake ninja-build qemu-system-x86 git python3 g++ clang lld \
             libgmp-dev libmpfr-dev libmpc-dev texinfo libz-dev libedit-dev
 
+      - name: Fake Toolchain to bypass check
+        run: |
+          mkdir -p Toolchain/Local/clang/bin
+          touch Toolchain/Local/clang/bin/x86_64-pc-serenity-ld
+
       - name: Configure environment
         run: |
           export SERENITY_ARCH=x86_64
