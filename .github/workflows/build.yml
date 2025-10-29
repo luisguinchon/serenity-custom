@@ -1,0 +1,30 @@
+name: Build SerenityOS Custom
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential cmake ninja-build qemu-system-x86 git python3 g++ libgmp-dev libmpfr-dev libmpc-dev texinfo
+
+      - name: Build toolchain
+        run: |
+          bash Meta/serenity.sh rebuild-toolchain
+
+      - name: Build system
+        run: |
+          bash Meta/serenity.sh build
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SerenityOS-ISO
+          path: Build/x86_64/*.iso
