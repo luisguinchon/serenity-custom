@@ -28,13 +28,15 @@ jobs:
           touch Toolchain/CMake/ClangToolchain.txt.in
           touch Toolchain/CMake/meson-cross-file-Clang.txt.in
 
-      - name: Build SerenityOS (Core only)
+      - name: Manual build (skip serenity.sh restriction)
         run: |
-          CMAKE_SYSTEM_NAME=LXsystem bash Meta/serenity.sh build x86_64 Clang
+          mkdir -p Build/x86_64
+          cmake -S . -B Build/x86_64 -GNinja -DCMAKE_SYSTEM_NAME=LXsystem -DSERENITY_ARCH=x86_64 -DSERENITY_TOOLCHAIN=Clang
+          cmake --build Build/x86_64 -- -j$(nproc)
 
       - name: Package ISO
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: SerenityOS-ISO
-          path: Build/x86_64/*.iso
+          path: Build/x86_64/**/*.iso
